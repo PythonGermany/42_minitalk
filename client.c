@@ -51,7 +51,7 @@ int	main(int argc, char *argv[])
 	int	i;
 
 	if (argc != 3)
-		return (ft_printf("%s <server_pid> <message>\n", argv[0]), 1);
+		return (ft_printf("Use: %s <server_pid> <message>\n", argv[0]), 1);
 	if (!ft_atoi(argv[1]) || kill(ft_atoi(argv[1]), 0))
 		return (ft_printf("\"%s\" is not a valid pid\n", argv[1]), 1);
 	signal(SIGUSR2, &handle_sig);

@@ -13,7 +13,6 @@
 #include <unistd.h>
 #include <signal.h>
 #include <stdlib.h>
-#include <sys/errno.h>
 #include "libft/libft.h"
 
 char	*g_message;
@@ -63,7 +62,7 @@ void	process_string(unsigned char c, siginfo_t *sginfo)
 		buffer[i] = 0;
 		g_message = ft_cpappend(g_message, buffer);
 		if (!g_message)
-			exit(errno);
+			exit(1);
 		i = 0;
 	}
 	if (!c)
@@ -75,7 +74,7 @@ void	process_string(unsigned char c, siginfo_t *sginfo)
 	}
 }
 
-void	handle_signals(int sig, siginfo_t *sginfo, void *imhere)
+void	handle_signal(int sig, siginfo_t *sginfo, void *imhere)
 {
 	static int				bit;
 	static unsigned char	c;
@@ -96,7 +95,7 @@ int	main(void)
 {
 	struct sigaction	sa;
 
-	sa.sa_sigaction = &handle_signals;
+	sa.sa_sigaction = &handle_signal;
 	sa.sa_flags = SA_SIGINFO;
 	sigaction(SIGUSR1, &sa, NULL);
 	sigaction(SIGUSR2, &sa, NULL);
