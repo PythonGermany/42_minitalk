@@ -11,7 +11,9 @@
 # **************************************************************************** #
 
 NAME = minitalk
-LIBFT = libft/libft.a
+
+FT_PATH = libft
+LIBFT_INC = $(FT_PATH)
 FLAGS = -Wall -Wextra -Werror
 
 SERVER_SOURCE = server.c
@@ -22,26 +24,26 @@ CLIENT_OBJECT = $(CLIENT_SOURCE:%.c=%.o)
 
 all : $(NAME)
 
-$(NAME) : server client
+$(NAME) : $(FT_PATH) server client
 
-server : $(SERVER_OBJECT) $(LIBFT)
-	cc -o server $(FLAGS) $(SERVER_OBJECT) $(LIBFT)
+server : $(SERVER_OBJECT)
+	make -C $(FT_PATH)
+	cc -o server $(FLAGS) $(SERVER_OBJECT) -L$(FT_PATH) -lft
 
-client : $(CLIENT_OBJECT) $(LIBFT)
-	cc -o client $(FLAGS) $(CLIENT_OBJECT) $(LIBFT)
+client : $(CLIENT_OBJECT)
+	make -C $(FT_PATH)
+	cc -o client $(FLAGS) $(CLIENT_OBJECT) -L$(FT_PATH) -lft
 
-$(LIBFT) :
-	make -C libft
+$(FT_PATH) :
+	git clone git@github.com:PythonGermany/42_libft.git $(FT_PATH)
 
-%.o : %.c
-	cc -c $(FLAGS) $^
+%.o: %.c
+	cc -c $(FLAGS) -I$(LIBFT_INC) $^ 
 
 clean :
-	make -C libft clean
-	rm -f $(SERVER_OBJECT) $(CLIENT_OBJECT)
+	rm -f $(OBJ)
 
-fclean : clean
-	make -C libft fclean
-	rm -f server client
+fclean: clean
+	rm -rf server client  $(SERVER_OBJECT) $(CLIENT_OBJECT) $(FT_PATH)
 
-re : fclean all
+re: fclean all

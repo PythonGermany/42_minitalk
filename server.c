@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <stdlib.h>
-#include "libft/libft.h"
+#include "libft.h"
 
 char	*g_message;
 
