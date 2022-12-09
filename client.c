@@ -11,21 +11,22 @@
 /* ************************************************************************** */
 
 #include <unistd.h>
-#include <stdlib.h>
 #include <signal.h>
+#include <stdlib.h>
 #include "libft/libft.h"
 
-int g_send;
+int	g_send;
 
 void	handle_sig(int sig)
 {
-	if (sig == SIGUSR2)
+	if (sig == SIGINT)
+		g_send = 0;
+	else if (sig == SIGUSR2)
 	{
-		write(1, "Message recieved!\n", 18);
+		if (g_send)
+			write(1, "Message recieved!\n", 18);
 		exit(0);
 	}
-	else if (sig == SIGINT)
-		g_send = 0;
 }
 
 void	send_char(unsigned char c, int server_pid)
@@ -35,7 +36,7 @@ void	send_char(unsigned char c, int server_pid)
 	i = 0;
 	while (i < 8)
 	{
-		if (c % 2 == 1)
+		if (c & 1)
 			kill(server_pid, SIGUSR2);
 		else
 			kill(server_pid, SIGUSR1);
@@ -50,25 +51,20 @@ int	main(int argc, char *argv[])
 	int	i;
 
 	if (argc != 3)
-	{
-		ft_printf("%s <server_pid> <message>\n", argv[0]);
-		return (1);
-	}
+		return (ft_printf("%s <server_pid> <message>\n", argv[0]), 1);
 	if (!ft_atoi(argv[1]) || kill(ft_atoi(argv[1]), 0))
-	{
-		ft_printf("\"%s\" is not a valid pid\n", argv[1]);
-		return (1);
-	}
+		return (ft_printf("\"%s\" is not a valid pid\n", argv[1]), 1);
 	signal(SIGUSR2, &handle_sig);
 	signal(SIGINT, &handle_sig);
 	i = 0;
 	g_send = 1;
-	while (g_send && argv[2][i])
+	while (g_send && argv[2][i] && !kill(ft_atoi(argv[1]), 0))
 		send_char((unsigned char)argv[2][i++], ft_atoi(argv[1]));
-	if (g_send)
+	if (!kill(ft_atoi(argv[1]), 0))
 	{
-		send_char(argv[2][i], ft_atoi(argv[1]));
-		pause();
+		send_char(0, ft_atoi(argv[1]));
+		return (pause(), 1);
 	}
-	return (0);
+	else
+		return (ft_printf("ERROR: Connection lost\n"), 1);
 }
