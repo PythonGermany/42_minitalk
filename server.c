@@ -14,12 +14,12 @@
 #include <signal.h>
 #include "libft/libft.h"
 
-unsigned char	nb;
-
-void handle_signals(int sig)
+void	handle_signals(int sig, siginfo_t *sginfo, void *imhere)
 {
-	static int	bit;
-	
+	static int				bit;
+	static unsigned char	nb;
+
+	(void)imhere;
 	nb >>= 1;
 	if (sig == SIGUSR2)
 		nb += 128;
@@ -27,21 +27,23 @@ void handle_signals(int sig)
 	if (bit == 8)
 	{
 		write(1, &nb, 1);
+		if (!nb)
+			kill(sginfo->si_pid, SIGUSR2);
 		nb = 0;
 		bit = 0;
 	}
 }
 
-int	main()
+int	main(void)
 {
-	struct sigaction sa;
-	sigemptyset(&sa.sa_mask);
-	sa.sa_handler = handle_signals;
-	sa.sa_flags = SA_RESTART;
+	struct sigaction	sa;
+
+	sa.sa_sigaction = &handle_signals;
+	sa.sa_flags = SA_SIGINFO;
 	sigaction(SIGUSR1, &sa, NULL);
 	sigaction(SIGUSR2, &sa, NULL);
 	ft_printf("%i\n", getpid());
-	nb = 0;
-	while (1);
+	while (1)
+		pause();
 	return (0);
 }
